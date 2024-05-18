@@ -1,20 +1,14 @@
 #pragma once
 
-#include "..\Templates\ProtogenProjectTemplate.h"
-#include "..\..\Assets\Models\OBJ\Background.h"
-#include "..\..\Assets\Models\FBX\Commissions\AceFace.h"
-#include "..\..\Assets\Models\FBX\Commissions\AceCrash.h"
-#include "..\..\Assets\Models\FBX\Commissions\AceCrashBackground.h"
-#include "..\..\Scene\Materials\Utils\MaterialAnimator.h"
+#include "..\ProtogenAnimation.h"
+#include "..\..\Objects\Background.h"
+#include "..\..\Objects\LEDStripBackground.h"
+#include "..\..\Morph\Commissions\AceFace.h"
+#include "..\..\Morph\Commissions\AceCrash.h"
+#include "..\..\Morph\Commissions\AceCrashBackground.h"
 
-#include "..\..\Camera\CameraManager\Implementations\WS35SplitCameras.h"
-#include "..\..\Controller\WS35Controller.h"
-
-class AceAnimation : public ProtogenProject {
+class AceAnimation : public ProtogenAnimation<3> {
 private:
-    WS35SplitCameraManager cameras;
-    WS35Controller controller = WS35Controller(&cameras, 50);
-
     AceFace pM;
     AceCrash crash;
     AceCrashBackground crashBackground;
@@ -29,7 +23,7 @@ private:
 	const __FlashStringHelper* faceArray[12] = {F("DEFAULT"), F("SMIRK"), F("CONTENT"), F("SRPRISE"), F("SRSLY"), F("ANGRY"), F("SCRUNCHY"), F("HAPPY"), F("CRASH"), F("AUDIO1"), F("AUDIO2"), F("AUDIO3")};
 
     void LinkControlParameters() override {
-        AddParameter(AceFace::Smirk, pM.GetMorphWeightReference(AceFace::Smirk), 25, IEasyEaseAnimator::InterpolationMethod::Cosine);
+        AddParameter(AceFace::Smirk, pM.GetMorphWeightReference(AceFace::Smirk), 25, EasyEaseInterpolation::InterpolationMethod::Cosine);
         AddParameter(AceFace::Blush, pM.GetMorphWeightReference(AceFace::Blush), 35);
         AddParameter(AceFace::Content, pM.GetMorphWeightReference(AceFace::Content), 40);
         AddParameter(AceFace::Surprised, pM.GetMorphWeightReference(AceFace::Surprised), 15);
@@ -101,7 +95,7 @@ private:
     }
 
 public:
-    AceAnimation() : ProtogenProject(&cameras, &controller, 1, Vector2D(10.0f, 5.0f), Vector2D(195.0f, 115.0f), 22, 23, 12){
+    AceAnimation() : ProtogenAnimation(Vector2D(10.0f, 5.0f), Vector2D(195.0f, 115.0f), 22, 0, 12){
         scene.AddObject(pM.GetObject());
         scene.AddObject(crash.GetObject());
         scene.AddObject(crashBackground.GetObject());
@@ -122,9 +116,6 @@ public:
         EnableBlinking();
 
         uint8_t mode = Menu::GetFaceState();//change by button press
-        
-        controller.SetBrightness(Menu::GetBrightness());
-        controller.SetAccentBrightness(Menu::GetAccentBrightness());
 
         if (IsBooped() && mode != 6){
             Blush();
@@ -163,8 +154,8 @@ public:
 
         Object3D* crashObjs[2] = {crash.GetObject(), crashBackground.GetObject()};
 
-        AlignObjectFace(pM.GetObject(), -7.5f);
-        AlignObjectsNoScale(Vector2D(10.0f, 5.0f), Vector2D(195.0f, 115.0f), crashObjs, 2, -2.5f);
+        AlignObject(pM.GetObject(), -7.5f);
+        AlignObjectsNoScale(crashObjs, 2, -2.5f);
 
         SetWiggleSpeed(5.0f);
         SetMenuWiggleSpeed(0.0f, 0.0f, 0.0f);
@@ -174,12 +165,16 @@ public:
         pM.GetObject()->GetTransform()->SetPosition(GetWiggleOffset());
         pM.GetObject()->UpdateTransform();
 
-        //crash.GetObject()->GetTransform()->SetPosition(Vector3D(-8.0f, 60.0f, 600.0f) + GetWiggleOffset());
+        crash.GetObject()->GetTransform()->SetPosition(Vector3D(-8.0f, 60.0f, 600.0f) + GetWiggleOffset());
         crash.GetObject()->GetTransform()->SetScale(Vector3D(1.0f, crashMaterial.GetMaterialOpacity(whiteMaterial), 1.0f));
         crash.GetObject()->UpdateTransform();
 
-        //crashBackground.GetObject()->GetTransform()->SetPosition(Vector3D(-8.0f, 60.0f, 700.0f) + GetWiggleOffset());
+        crashBackground.GetObject()->GetTransform()->SetPosition(Vector3D(-8.0f, 60.0f, 700.0f) + GetWiggleOffset());
         crashBackground.GetObject()->GetTransform()->SetScale(Vector3D(1.0f, crashBackgroundMaterial.GetMaterialOpacity(lBlueMaterial), 1.0f));
         crashBackground.GetObject()->UpdateTransform();
     }
 };
+
+
+//rotate objects and move objects to center, no scale
+//

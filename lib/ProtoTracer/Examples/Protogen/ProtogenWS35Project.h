@@ -36,7 +36,9 @@ private:
         AddBlinkParameter(pM.GetMorphWeightReference(NukudeFace::Blink));
     }
 
-    void Default(){}
+    void Default(){
+        AddMaterialFrame(Color::CGREEN);
+    }
 
     void Angry(){
         AddParameterFrame(NukudeFace::Anger, 1.0f);
@@ -86,9 +88,6 @@ public:
         pM.Reset();
 
         uint8_t mode = Menu::GetFaceState();//change by button press
-        
-        controller.SetBrightness(Menu::GetBrightness());
-        controller.SetAccentBrightness(Menu::GetAccentBrightness());
 
         if (IsBooped() && mode != 6){
             Surprised();
